@@ -21,7 +21,6 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(""); 
 
     try {
       const response = await fetch("https://offers-api.digistos.com/api/auth/register", {
@@ -41,7 +40,7 @@ const Register = () => {
       navigate("/login");
     } catch (err) {
       console.error("Erreur serveur :", err);
-      setError(err.message || "Une erreur est survenue. Veuillez réessayer.");
+      setError("Une erreur est survenue. Veuillez réessayer.");
     }
   };
 
