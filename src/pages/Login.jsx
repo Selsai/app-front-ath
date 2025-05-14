@@ -32,21 +32,25 @@ const LoginPage = () => {
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.message || "Une erreur est survenue lors de la connexion.");
+        throw { status: response.status, message: data.message || "Une erreur est survenue." };
       }
 
       const data = await response.json();
       
       // Rediriger vers la page d'accueil
-      navigate("/");
+      navigate("/offres/professionnelles");
     } catch (err) {
       console.error("Erreur de connexion:", err);
       
-      // Gestion des erreurs
-      if (err.message.includes("identifiants") || err.message.includes("credentials")) {
+      // Gestion des erreurs basée sur le status code
+      if (err.status === 401) {
         setError("Email ou mot de passe incorrect.");
+      } else if (err.status === 429) {
+        setError("Trop de tentatives de connexion. Veuillez réessayer plus tard.");
+      } else if (err.status === 422) {
+        setError("Données de formulaire invalides. Veuillez vérifier vos informations.");
       } else {
-        setError("Une erreur est survenue. Veuillez réessayer.");
+        setError(`Une erreur est survenue (${err.status || 'Inconnue'}). Veuillez réessayer.`);
       }
     }
   };
