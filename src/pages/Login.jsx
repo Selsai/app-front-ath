@@ -31,25 +31,23 @@ const LoginPage = () => {
       });
 
       if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error("Email ou mot de passe incorrect.");
-        } else if (response.status === 404) {
-          throw new Error("Email non reconnu.");
-        } else {
-          throw new Error("Une erreur est survenue lors de la connexion.");
-        }
+        const data = await response.json();
+        throw new Error(data.message || "Une erreur est survenue lors de la connexion.");
       }
 
       const data = await response.json();
       
-      // Stocker le token dans le localStorage
-      localStorage.setItem("token", data.token);
-      
-      // Rediriger vers la page des offres pro
-      navigate("/offers/pro");
+      // Rediriger vers la page d'accueil
+      navigate("/");
     } catch (err) {
       console.error("Erreur de connexion:", err);
-      setError(err.message || "Une erreur est survenue. Veuillez réessayer.");
+      
+      // Gestion des erreurs
+      if (err.message.includes("identifiants") || err.message.includes("credentials")) {
+        setError("Email ou mot de passe incorrect.");
+      } else {
+        setError("Une erreur est survenue. Veuillez réessayer.");
+      }
     }
   };
 
