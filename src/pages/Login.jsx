@@ -13,7 +13,7 @@ import {
 const LoginPage = () => {
   const [formData, setFormData] = useState({
     email: "amairi.selsabil@example.com",
-    password: "123456",
+    password: "motdepasse123456",
   });
 
   const handleChange = (e) => {
