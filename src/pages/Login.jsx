@@ -9,6 +9,8 @@ import {
   Col,
   Alert,
 } from "react-bootstrap";
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "../store/slice";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -25,9 +27,15 @@ const LoginPage = () => {
 
   const [errorText, setErrorText] = useState();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Handle login logic here
+    // Don't forget to handle errors, both for yourself (dev) and for the client (via a Bootstrap Alert):
+    //   - Show an error if credentials are invalid
+    //   - Show a generic error for all other cases
+    // On success, redirect to the Pro Offers page
     try {
       const response = await fetch(
         "https://offers-api.digistos.com/api/auth/login",
@@ -42,23 +50,25 @@ const LoginPage = () => {
       );
 
       const data = await response.json();
-
       if (!response.ok) {
         throw { status: response.status, message: data.message };
       }
 
-      localStorage.setItem("auth",JSON.stringify({
-        token: data.access_token,
-        // Calcule la date d’expiration en ISO à partir de l’heure actuelle et de expires_in
-        expiresAt: new Date(Date.now() + data.expires_in * 1000).toISOString() 
-      }));
+      dispatch(
+        loginSuccess({
+          token: data.access_token,
+          expiresAt: new Date(
+            Date.now() + data.expires_in * 1000
+          ).toISOString(),
+        })
+      );
 
       navigate("/offres/professionnelles");
     } catch (error) {
       console.error(error);
       if (error.status == 401) {
         setErrorText("Email ou mot de passe incorrect");
-      }else{
+      } else {
         setErrorText("Une erreur est survenue");
       }
     }

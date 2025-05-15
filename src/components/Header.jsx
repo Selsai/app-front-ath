@@ -1,21 +1,11 @@
 import { Nav, Navbar, Container } from "react-bootstrap";
-import { NavLink, useLocation } from "react-router";
+import { NavLink } from "react-router";
 import "../assets/styles/Header.css";
-import { useState,useEffect } from "react";
+import { useSelector } from "react-redux";
+
 function Header() {
-  const location = useLocation(); // Donne accès à l'URL courante ; change à chaque navigation
-
-  const getValidToken = () => {
-    const auth = JSON.parse(localStorage.getItem("auth"));
-    const isValid = auth && new Date(auth.expiresAt) > new Date();
-    return isValid ? auth.token : null;
-  };
-
-  const [token, setToken] = useState(getValidToken);
-
-  useEffect(() => {
-    setToken(getValidToken());
-  }, [location]); // Ce code s’exécutera à chaque fois que l’URL change
+  const auth = useSelector((state) => state.auth);
+  const isValidToken = auth && new Date(auth.expiresAt) > new Date();
 
   return (
     <Navbar bg="light" data-bs-theme="light">
@@ -30,7 +20,7 @@ function Header() {
           <Nav.Link as={NavLink} to="/offres/professionnelles">
             Offres Professionnelles
           </Nav.Link>
-          {token ? (
+          {isValidToken ? (
             <Nav.Link as={NavLink} to="/deconnexion">
               Déconnexion
             </Nav.Link>
