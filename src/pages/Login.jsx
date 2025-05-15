@@ -1,14 +1,22 @@
 import { useState } from "react";
-import { Form, Button, Container, Card, Row, Col, Alert } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
+import {
+  Form,
+  Button,
+  Container,
+  Card,
+  Row,
+  Col,
+  Alert,
+} from "react-bootstrap";
+import { useDispatch } from "react-redux";
+import { loginSuccess } from "../store/slice";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
+    email: "amairiselsabil@gmail.com",
+    password: "motdepasse123456",
   });
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
@@ -17,40 +25,51 @@ const LoginPage = () => {
     });
   };
 
+  const [errorText, setErrorText] = useState();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    // Handle login logic here
+    // Don't forget to handle errors, both for yourself (dev) and for the client (via a Bootstrap Alert):
+    //   - Show an error if credentials are invalid
+    //   - Show a generic error for all other cases
+    // On success, redirect to the Pro Offers page
     try {
-      const response = await fetch("https://offers-api.digistos.com/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw { status: response.status, message: data.message || "Une erreur est survenue." };
-      }
+      const response = await fetch(
+        "https://offers-api.digistos.com/api/auth/login",
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
 
       const data = await response.json();
-      
-      // Rediriger vers la page d'accueil
+      if (!response.ok) {
+        throw { status: response.status, message: data.message };
+      }
+
+      dispatch(
+        loginSuccess({
+          token: data.access_token,
+          expiresAt: new Date(
+            Date.now() + data.expires_in * 1000
+          ).toISOString(),
+        })
+      );
+
       navigate("/offres/professionnelles");
-    } catch (err) {
-      console.error("Erreur de connexion:", err);
-      
-      // Gestion des erreurs basée sur le status code
-      if (err.status === 401) {
-        setError("Email ou mot de passe incorrect.");
-      } else if (err.status === 429) {
-        setError("Trop de tentatives de connexion. Veuillez réessayer plus tard.");
-      } else if (err.status === 422) {
-        setError("Données de formulaire invalides. Veuillez vérifier vos informations.");
+    } catch (error) {
+      console.error(error);
+      if (error.status == 401) {
+        setErrorText("Email ou mot de passe incorrect");
       } else {
-        setError(`Une erreur est survenue (${err.status || 'Inconnue'}). Veuillez réessayer.`);
+        setErrorText("Une erreur est survenue");
       }
     }
   };
@@ -61,9 +80,11 @@ const LoginPage = () => {
         <Col xs={12} sm={8} md={6} lg={4}>
           <Card className="p-4 shadow-lg">
             <h2 className="text-center mb-4">Se connecter</h2>
-            
-            {error && <Alert variant="danger">{error}</Alert>}
-            
+            {errorText && (
+              <Alert key="warning" variant="warning">
+                {errorText}
+              </Alert>
+            )}
             <Form onSubmit={handleSubmit}>
               <Form.Group className="mb-3" controlId="loginEmail">
                 <Form.Label>Email</Form.Label>
