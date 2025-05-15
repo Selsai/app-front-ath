@@ -1,16 +1,23 @@
 import { useState } from "react";
-import { Form, Button, Container, Card, Row, Col, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router";
+import {
+  Form,
+  Button,
+  Container,
+  Card,
+  Row,
+  Col,
+  Alert,
+} from "react-bootstrap";
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    email: "",
     name: "",
+    email: "",
     password: "",
   });
 
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
+  const [errorText, setErrorText] = useState();
 
   const handleChange = (e) => {
     setFormData({
@@ -19,28 +26,35 @@ const Register = () => {
     });
   };
 
+  const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Handle signup logic here
+    // Don't forget to handle errors, both for yourself (dev) and for the client (via a Bootstrap Alert)
+    // Redirect to Login on success
     try {
-      const response = await fetch("https://offers-api.digistos.com/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json", 
-        },
-        body: JSON.stringify(formData),
-      });
-      
+      const response = await fetch(
+        "https://offers-api.digistos.com/api/auth/register",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.message || "Erreur lors de l'inscription.");
+        throw { status: response.status, message: data.message };
       }
-
-      navigate("/login");
-    } catch (err) {
-      console.error("Erreur serveur :", err);
-      setError("Une erreur est survenue. Veuillez réessayer.");
+      navigate("/");
+    } catch (error) {
+      console.error(error);
+      setErrorText(
+        "Erreur de validation des champs : veuillez utiliser un autre adresse mail"
+      );
     }
   };
 
@@ -50,9 +64,11 @@ const Register = () => {
         <Col xs={12} sm={8} md={6} lg={4}>
           <Card className="p-4 shadow-lg">
             <h2 className="text-center mb-4">Créer un compte</h2>
-            
-            {error && <Alert variant="danger">{error}</Alert>}
-
+            {errorText && (
+              <Alert key="warning" variant="warning">
+                {errorText}
+              </Alert>
+            )}
             <Form onSubmit={handleSubmit}>
               <Form.Group className="mb-3" controlId="formEmail">
                 <Form.Label>Email</Form.Label>
