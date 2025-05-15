@@ -17,7 +17,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/inscription" element={<Register />} />
         <Route path="/connexion" element={<Login />} />
-        <Route element={<PrivateRoute />}>
+        <Route element={<PrivateRoute/>}>
           <Route path="/deconnexion" element={<Logout />} />
           <Route path="/offres/professionnelles" element={<OfferProList />} />
         </Route>

@@ -1,11 +1,20 @@
 import { Nav, Navbar, Container } from "react-bootstrap";
 import { NavLink } from "react-router";
 import "../assets/styles/Header.css";
-import { useSelector } from "react-redux";
-
+import { useLocation } from "react-router";
+import { useEffect, useState } from "react";
 function Header() {
-  const auth = useSelector((state) => state.auth);
-  const isValidToken = auth && new Date(auth.expiresAt) > new Date();
+  const location = useLocation();
+  const [isConnected, setIsConnected] = useState(false);
+
+  useEffect(() => {
+    const authData = JSON.parse(localStorage.getItem("auth"));
+    if (authData && new Date(authData.expiresAt) > new Date()) {
+      setIsConnected(true);
+    } else {
+      setIsConnected(false);
+    }
+  }, [location]);
 
   return (
     <Navbar bg="light" data-bs-theme="light">
@@ -20,7 +29,7 @@ function Header() {
           <Nav.Link as={NavLink} to="/offres/professionnelles">
             Offres Professionnelles
           </Nav.Link>
-          {isValidToken ? (
+          {isConnected ? (
             <Nav.Link as={NavLink} to="/deconnexion">
               Déconnexion
             </Nav.Link>

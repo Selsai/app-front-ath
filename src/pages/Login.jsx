@@ -9,12 +9,10 @@ import {
   Col,
   Alert,
 } from "react-bootstrap";
-import { useDispatch } from "react-redux";
-import { loginSuccess } from "../store/slice";
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
-    email: "amairiselsabil@gmail.com",
+    email: "amairiselsabi@gmail.com",
     password: "motdepasse123456",
   });
 
@@ -27,7 +25,6 @@ const LoginPage = () => {
 
   const [errorText, setErrorText] = useState();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,6 +43,7 @@ const LoginPage = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(formData),
+          credentials: "include", // permet au navigateur de recevoir et stocker le cookie HttpOnly
         }
       );
 
@@ -54,15 +52,15 @@ const LoginPage = () => {
         throw { status: response.status, message: data.message };
       }
 
-      dispatch(
-        loginSuccess({
-          token: data.access_token,
+      localStorage.setItem(
+        "auth",
+        JSON.stringify({
           expiresAt: new Date(
             Date.now() + data.expires_in * 1000
           ).toISOString(),
         })
       );
-
+      
       navigate("/offres/professionnelles");
     } catch (error) {
       console.error(error);
