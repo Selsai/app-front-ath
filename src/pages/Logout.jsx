@@ -1,4 +1,3 @@
-// src/components/Logout.jsx
 import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "../store/authSlice";
@@ -15,7 +14,7 @@ const Logout = () => {
         await fetch("https://offers-api.digistos.com/api/auth/logout", {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: Bearer ${token},
           },
         });
       } catch (error) {
